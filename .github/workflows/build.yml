@@ -1,0 +1,28 @@
+name: Trigger Unity Cloud Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  trigger-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
+
+      - name: Trigger Unity Cloud Build
+        run: |
+          curl -X POST \
+            -H "Authorization: Basic ${{ secrets.UNITY_CLOUD_BUILD_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            "https://build-api.cloud.unity3d.com/api/v1/orgs/${{ secrets.UNITY_ORG_ID }}/projects/${{ secrets.UNITY_PROJECT_ID }}/buildtargets/default-android/builds" \
+            -d '{"clean": false, "delay": 0}'
